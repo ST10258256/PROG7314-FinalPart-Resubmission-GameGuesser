@@ -4,13 +4,16 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.gameguesser.Class.LocalUser
 import com.example.gameguesser.Class.User
+import com.example.gameguesser.DAOs.LocalUserDao
 import com.example.gameguesser.DAOs.UserDao
 
-@Database(entities = [User::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, LocalUser::class], version = 2, exportSchema = false)
 abstract class UserDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
+    abstract fun localUserDao(): LocalUserDao
 
     companion object {
         @Volatile
