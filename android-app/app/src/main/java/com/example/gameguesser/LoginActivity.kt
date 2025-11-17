@@ -13,7 +13,9 @@ import androidx.core.os.postDelayed
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.gameguesser.Class.User
+import com.example.gameguesser.Class.LocalUser
 import com.example.gameguesser.Database.UserDatabase
+import com.example.gameguesser.data.PasswordUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -24,7 +26,6 @@ import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 
 class LoginActivity : AppCompatActivity() {
 
@@ -150,30 +151,34 @@ class LoginActivity : AppCompatActivity() {
         val db = UserDatabase.getDatabase(this)
 
         CoroutineScope(Dispatchers.IO).launch {
-            val user = db.userDao().getUser(email)
+            // Use localUserDao (where Register stored LocalUser)
+            val localUser = db.localUserDao().getUser(email)
 
             runOnUiThread {
-                if (user == null) {
+                if (localUser == null) {
                     Toast.makeText(this@LoginActivity, "Account not found", Toast.LENGTH_SHORT).show()
                     return@runOnUiThread
                 }
 
-                val hashedInput = hashPassword(password)
+                val hashedInput = PasswordUtils.hash(password)
 
-                if (hashedInput != user.streak.toString()) {
+                if (hashedInput != localUser.passwordHash) {
                     Toast.makeText(this@LoginActivity, "Incorrect password", Toast.LENGTH_SHORT).show()
                 } else {
-                    Toast.makeText(this@LoginActivity, "Welcome back ${user.userName}", Toast.LENGTH_SHORT).show()
+                    // Save prefs for offline welcome like Google flow
+                    val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+                    with(prefs.edit()) {
+                        putString("userName", localUser.userName)
+                        putString("userEmail", localUser.email)
+                        putString("userId", localUser.email) // using email as id for local users
+                        apply()
+                    }
+
+                    Toast.makeText(this@LoginActivity, "Welcome back ${localUser.userName}", Toast.LENGTH_SHORT).show()
                     goToMainActivity(null)
                 }
             }
         }
-    }
-
-    // Simple SHA-256 hashing for demo purposes
-    private fun hashPassword(input: String): String {
-        val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
     }
 
     private fun goToMainActivity(account: GoogleSignInAccount?) {
