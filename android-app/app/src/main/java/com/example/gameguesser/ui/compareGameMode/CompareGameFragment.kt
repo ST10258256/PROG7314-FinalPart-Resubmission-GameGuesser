@@ -2,7 +2,9 @@ package com.example.gameguesser.ui.compareGameMode
 
 import android.app.AlertDialog
 import android.content.res.ColorStateList
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +15,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
@@ -166,37 +169,65 @@ class CompareGameFragment : Fragment() {
     }
 
     // UI Updating
-    private fun updateComparisonUI(matches: Map<String, Boolean>) {
+    private fun updateComparisonUI(matchesRaw: Map<String, Any>) {
+        // Debug: log what we received
+        Log.d("CompareUI", "matchesRaw = $matchesRaw")
 
         val card = layoutInflater.inflate(R.layout.item_guess_card, null)
         val guessTitle = card.findViewById<TextView>(R.id.guessTitle)
         val chipContainer = card.findViewById<FlexboxLayout>(R.id.chipContainer)
 
-        // Show guess text
         guessTitle.text = "You guessed: ${guessInput.text}"
 
-        for ((key, matched) in matches) {
+        for ((key, rawValue) in matchesRaw) {
             val chipView = layoutInflater.inflate(R.layout.item_match_chip, null)
             val chip = chipView.findViewById<TextView>(R.id.matchChip)
-
             chip.text = key
 
-            // color the box
-            if (matched) {
-                chip.backgroundTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.green, null)
-                )
-            } else {
-                chip.backgroundTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.red, null)
-                )
+            // Determine color based on rawValue type and content
+            val colorInt = when (rawValue) {
+                is Boolean -> {
+                    if (rawValue) ContextCompat.getColor(requireContext(), R.color.green)
+                    else ContextCompat.getColor(requireContext(), R.color.red)
+                }
+                is String -> {
+                    when (rawValue.lowercase().trim()) {
+                        "exact", "true", "match", "matched" -> ContextCompat.getColor(requireContext(), R.color.green)
+                        "partial", "partial-match", "some", "some-match" -> ContextCompat.getColor(requireContext(), R.color.orange)
+                        "none", "false", "no", "nomatch" -> ContextCompat.getColor(requireContext(), R.color.red)
+                        else -> {
+                            // Fallback: if it's parsable as boolean
+                            rawValue.toBooleanStrictOrNull()?.let { if (it) ContextCompat.getColor(requireContext(), R.color.green) else ContextCompat.getColor(requireContext(), R.color.red) }
+                                ?: ContextCompat.getColor(requireContext(), R.color.red)
+                        }
+                    }
+                }
+                else -> {
+                    // Unknown type — default to red and log it
+                    Log.w("CompareUI", "Unknown match value type for $key: ${rawValue::class.java} -> $rawValue")
+                    ContextCompat.getColor(requireContext(), R.color.red)
+                }
             }
+
+            // Apply color to chip background safely (assumes item_match_chip background is a shape drawable)
+            val bg = chip.background
+            if (bg is GradientDrawable) {
+                bg.mutate()
+                bg.setColor(colorInt)
+            } else {
+                chip.setBackgroundColor(colorInt)
+            }
+
+            // Optional: set text color to white for contrast
+            chip.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
 
             chipContainer.addView(chipView)
         }
 
+        // Add new card at top
         comparisonContainer.addView(card, 0)
     }
+
 
 
 
