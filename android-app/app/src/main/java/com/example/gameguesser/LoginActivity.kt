@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.postDelayed
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.gameguesser.Class.User
@@ -19,8 +18,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.logging.Handler
+import kotlinx.coroutines.withContext
 
 class LoginActivity : AppCompatActivity() {
 
@@ -32,7 +33,7 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         //Change to true if there is an issue with logging
-        val devBypass = false
+        val devBypass = true
         if (devBypass) {
             Toast.makeText(this, "Bypassing login (DEV MODE)", Toast.LENGTH_SHORT).show()
             goToMainActivity(null)
@@ -72,7 +73,8 @@ class LoginActivity : AppCompatActivity() {
                 Toast.makeText(this, "Welcome back $savedUserName (offline)", Toast.LENGTH_SHORT).show()
                 android.os.Handler(Looper.getMainLooper()).postDelayed({
                     goToMainActivity(null)
-                }, 500)}
+                }, 500)
+            }
         }
 
         val btnGoogleSignIn = findViewById<SignInButton>(R.id.btnGoogleSignIn)
@@ -105,15 +107,26 @@ class LoginActivity : AppCompatActivity() {
                     apply()
                 }
                 // also saves them to room
-                val user = User(
-                    userId = account.id ?: "",
-                    userName = account.displayName ?: "Player",
-                    streak = 0
-                )
-
                 val db = UserDatabase.getDatabase(this)
-                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                    db.userDao().addUser(user)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val userId = account.id ?: ""
+                    var user = db.userDao().getUser(userId)
+
+                    if (user == null) {
+                        user = User(
+                            userId = userId,
+                            userName = account.displayName ?: "Player",
+                            streakKW = 0,
+                            streakCG = 0
+                        )
+                        db.userDao().addUser(user)
+                    } else {
+                        // Optional: Update username if it has changed
+                        if (user.userName != account.displayName) {
+                            user.userName = account.displayName ?: "Player"
+                            db.userDao().updateUser(user)
+                        }
+                    }
                 }
 
                 // welcm back msg
@@ -135,4 +148,3 @@ class LoginActivity : AppCompatActivity() {
         finish()
     }
 }
-
