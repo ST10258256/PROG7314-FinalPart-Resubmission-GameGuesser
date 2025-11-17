@@ -83,15 +83,21 @@
         android:backgroundTint="#2E2157"
         android:layout_marginTop="16dp"/>
 
-    <LinearLayout
-        android:id="@+id/comparisonContainer"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:gravity="center_horizontal">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="16dp">
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/comparisonContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"/>
+
+    </ScrollView>
+
 
 
     <!-- Result Text -->

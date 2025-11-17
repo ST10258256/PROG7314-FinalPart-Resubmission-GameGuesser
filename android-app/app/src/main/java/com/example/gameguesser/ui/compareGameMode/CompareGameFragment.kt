@@ -1,6 +1,7 @@
 package com.example.gameguesser.ui.compareGameMode
 
 import android.app.AlertDialog
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,6 +22,7 @@ import com.example.gameguesser.data.RetrofitClient
 import com.example.gameguesser.models.CompareRequest
 import com.example.gameguesser.models.ComparisonResponse
 import com.example.gameguesser.repository.GameRepository
+import com.google.android.flexbox.FlexboxLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
@@ -101,10 +103,7 @@ class CompareGameFragment : Fragment() {
         return view
     }
 
-    // -----------------------------
-    // Database + API calls
-    // -----------------------------
-
+    // Database and API calls
     private fun fetchAllGames() {
         val dao = AppDatabase.getDatabase(requireContext()).gameDao()
         val repository = GameRepository(dao, RetrofitClient.api)
@@ -166,31 +165,40 @@ class CompareGameFragment : Fragment() {
             })
     }
 
-    // -----------------------------
     // UI Updating
-    // -----------------------------
-
     private fun updateComparisonUI(matches: Map<String, Boolean>) {
-        comparisonContainer.removeAllViews()
+
+        val card = layoutInflater.inflate(R.layout.item_guess_card, null)
+        val guessTitle = card.findViewById<TextView>(R.id.guessTitle)
+        val chipContainer = card.findViewById<FlexboxLayout>(R.id.chipContainer)
+
+        // Show guess text
+        guessTitle.text = "You guessed: ${guessInput.text}"
 
         for ((key, matched) in matches) {
-            val row = layoutInflater.inflate(R.layout.item_match_row, null)
-            val label = row.findViewById<TextView>(R.id.matchLabel)
-            val status = row.findViewById<TextView>(R.id.matchStatus)
+            val chipView = layoutInflater.inflate(R.layout.item_match_chip, null)
+            val chip = chipView.findViewById<TextView>(R.id.matchChip)
 
-            label.text = key
+            chip.text = key
 
+            // color the box
             if (matched) {
-                status.text = "Match"
-                status.setTextColor(resources.getColor(R.color.green, null))
+                chip.backgroundTintList = ColorStateList.valueOf(
+                    resources.getColor(R.color.green, null)
+                )
             } else {
-                status.text = "No Match"
-                status.setTextColor(resources.getColor(R.color.red, null))
+                chip.backgroundTintList = ColorStateList.valueOf(
+                    resources.getColor(R.color.red, null)
+                )
             }
 
-            comparisonContainer.addView(row)
+            chipContainer.addView(chipView)
         }
+
+        comparisonContainer.addView(card, 0)
     }
+
+
 
     private fun loseHeart() {
         if (hearts.isNotEmpty()) {
@@ -227,10 +235,7 @@ class CompareGameFragment : Fragment() {
         keywordsChipGroup.addView(chip)
     }
 
-    // -----------------------------
     // End Game Dialog
-    // -----------------------------
-
     private fun showEndGameDialog(won: Boolean, gameName: String, coverUrl: String?) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_end_game, null)
 
@@ -240,7 +245,7 @@ class CompareGameFragment : Fragment() {
         val playAgainBtn = dialogView.findViewById<Button>(R.id.playAgainButton)
         val mainMenuBtn = dialogView.findViewById<Button>(R.id.mainMenuButton)
 
-        titleText.text = if (won) "Congratulations!" else "Better luck next time"
+        titleText.text = if (won) "Congratulations" else "Better luck next time"
         nameText.text = "The game was: $gameName"
 
         coverUrl?.let {
