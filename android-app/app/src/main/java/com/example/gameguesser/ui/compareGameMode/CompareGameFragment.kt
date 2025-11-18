@@ -2,24 +2,28 @@ package com.example.gameguesser.ui.compareGameMode
 
 import android.app.AlertDialog
 import android.content.res.ColorStateList
-import android.graphics.drawable.GradientDrawable
+import android.icu.util.Calendar
 import android.os.Bundle
-import android.util.Log
+import android.text.format.DateUtils.isToday
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
+import android.content.Context
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.content.ContextCompat
+import androidx.activity.result.launch
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
+import com.example.gameguesser.DAOs.UserDao
 import com.example.gameguesser.Database.AppDatabase
+import com.example.gameguesser.Database.UserDatabase
 import com.example.gameguesser.R
 import com.example.gameguesser.data.RetrofitClient
 import com.example.gameguesser.models.CompareRequest
@@ -31,11 +35,15 @@ import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class CompareGameFragment : Fragment() {
+
+    private lateinit var userDb: UserDatabase
+    private lateinit var userDao: UserDao
 
     private var currentGameId: String? = null
     private var currentGameName: String? = null
@@ -62,6 +70,8 @@ class CompareGameFragment : Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_compare_game, container, false)
 
+        userDb = UserDatabase.getDatabase(requireContext())
+        userDao = userDb.userDao()
         resultText = view.findViewById(R.id.resultText)
         guessInput = view.findViewById(R.id.guessInput)
         guessButton = view.findViewById(R.id.guessButton)
@@ -169,65 +179,37 @@ class CompareGameFragment : Fragment() {
     }
 
     // UI Updating
-    private fun updateComparisonUI(matchesRaw: Map<String, Any>) {
-        // Debug: log what we received
-        Log.d("CompareUI", "matchesRaw = $matchesRaw")
+    private fun updateComparisonUI(matches: Map<String, Boolean>) {
 
         val card = layoutInflater.inflate(R.layout.item_guess_card, null)
         val guessTitle = card.findViewById<TextView>(R.id.guessTitle)
         val chipContainer = card.findViewById<FlexboxLayout>(R.id.chipContainer)
 
+        // Show guess text
         guessTitle.text = "You guessed: ${guessInput.text}"
 
-        for ((key, rawValue) in matchesRaw) {
+        for ((key, matched) in matches) {
             val chipView = layoutInflater.inflate(R.layout.item_match_chip, null)
             val chip = chipView.findViewById<TextView>(R.id.matchChip)
+
             chip.text = key
 
-            // Determine color based on rawValue type and content
-            val colorInt = when (rawValue) {
-                is Boolean -> {
-                    if (rawValue) ContextCompat.getColor(requireContext(), R.color.green)
-                    else ContextCompat.getColor(requireContext(), R.color.red)
-                }
-                is String -> {
-                    when (rawValue.lowercase().trim()) {
-                        "exact", "true", "match", "matched" -> ContextCompat.getColor(requireContext(), R.color.green)
-                        "partial", "partial-match", "some", "some-match" -> ContextCompat.getColor(requireContext(), R.color.orange)
-                        "none", "false", "no", "nomatch" -> ContextCompat.getColor(requireContext(), R.color.red)
-                        else -> {
-                            // Fallback: if it's parsable as boolean
-                            rawValue.toBooleanStrictOrNull()?.let { if (it) ContextCompat.getColor(requireContext(), R.color.green) else ContextCompat.getColor(requireContext(), R.color.red) }
-                                ?: ContextCompat.getColor(requireContext(), R.color.red)
-                        }
-                    }
-                }
-                else -> {
-                    // Unknown type — default to red and log it
-                    Log.w("CompareUI", "Unknown match value type for $key: ${rawValue::class.java} -> $rawValue")
-                    ContextCompat.getColor(requireContext(), R.color.red)
-                }
-            }
-
-            // Apply color to chip background safely (assumes item_match_chip background is a shape drawable)
-            val bg = chip.background
-            if (bg is GradientDrawable) {
-                bg.mutate()
-                bg.setColor(colorInt)
+            // color the box
+            if (matched) {
+                chip.backgroundTintList = ColorStateList.valueOf(
+                    resources.getColor(R.color.green, null)
+                )
             } else {
-                chip.setBackgroundColor(colorInt)
+                chip.backgroundTintList = ColorStateList.valueOf(
+                    resources.getColor(R.color.red, null)
+                )
             }
-
-            // Optional: set text color to white for contrast
-            chip.setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
 
             chipContainer.addView(chipView)
         }
 
-        // Add new card at top
         comparisonContainer.addView(card, 0)
     }
-
 
 
 
@@ -276,7 +258,39 @@ class CompareGameFragment : Fragment() {
         val playAgainBtn = dialogView.findViewById<Button>(R.id.playAgainButton)
         val mainMenuBtn = dialogView.findViewById<Button>(R.id.mainMenuButton)
 
-        titleText.text = if (won) "Congratulations" else "Better luck next time"
+        //Old code = titleText.text = if (won)  "Congratulations" else "Better luck next time"
+        if (won) {
+            titleText.text = getString(R.string.congrats)
+            lifecycleScope.launch(Dispatchers.IO) {
+                val userId = getLoggedInUserId() // You need a function to get the current user's ID
+                if (userId == null) return@launch
+
+                val user = userDao.getUser(userId)
+                if (user != null) {
+                    // Check if the last win was on a different day
+                    if (!isToday(user.lastPlayedCG)) {
+                        user.streakCG += 1 // Increment the streak
+                    }
+                    // Update the best streak if the current one is higher
+                    if (user.streakCG > user.bestStreakCG) {
+                        user.bestStreakCG = user.streakCG
+                    }
+
+                    // Update the last played date to now
+                    user.lastPlayedCG = System.currentTimeMillis()
+
+                    // Save the updated user back to the database
+                    userDao.updateUser(user)
+
+                    // You can update the UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        // e.g., Toast.makeText(context, "Streak: ${user.streakCG}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } else {
+            titleText.text = getString(R.string.failure)
+        }
         nameText.text = "The game was: $gameName"
 
         coverUrl?.let {
@@ -310,5 +324,25 @@ class CompareGameFragment : Fragment() {
         resultText.text = ""
         comparisonContainer.removeAllViews()
         fetchRandomGame()
+    }
+
+    //Matthew code down here
+    // Helper function to check if a timestamp is from today
+    private fun isToday(timestamp: Long): Boolean {
+        if (timestamp == 0L) return false
+        val lastPlayedCal = Calendar.getInstance()
+        lastPlayedCal.timeInMillis = timestamp
+
+        val todayCal = Calendar.getInstance()
+
+        return lastPlayedCal.get(Calendar.YEAR) == todayCal.get(Calendar.YEAR) &&
+                lastPlayedCal.get(Calendar.DAY_OF_YEAR) == todayCal.get(Calendar.DAY_OF_YEAR)
+    }
+
+
+    // Helper function to get the user ID (you might get this from SharedPreferences)
+    private fun getLoggedInUserId(): String? {
+        val prefs = requireActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        return prefs.getString("userId", null)
     }
 }

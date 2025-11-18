@@ -9,11 +9,8 @@ import com.example.gameguesser.data.Game
 import com.example.gameguesser.DAOs.GameDAO.GameDao
 import com.example.gameguesser.data.GameConverters
 
-@Database(
-    entities = [Game::class],
-    version = 2,
-    exportSchema = false
-)
+
+@Database(entities = [Game::class], version = 2)
 @TypeConverters(GameConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
@@ -29,6 +26,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "gameguesser_db"
                 )
+                    // Add this line to handle the version change
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
