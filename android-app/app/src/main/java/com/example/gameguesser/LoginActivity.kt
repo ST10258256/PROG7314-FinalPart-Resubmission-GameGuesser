@@ -104,17 +104,9 @@ class LoginActivity : AppCompatActivity() {
                     putString("userId", account.id)
                     apply()
                 }
-                // also saves them to room
-                val user = User(
-                    userId = account.id ?: "",
-                    userName = account.displayName ?: "Player",
-                    streak = 0
-                )
 
                 val db = UserDatabase.getDatabase(this)
-                kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-                    db.userDao().addUser(user)
-                }
+
 
                 // welcm back msg
                 Toast.makeText(this, "Welcome ${account.displayName}", Toast.LENGTH_SHORT).show()
