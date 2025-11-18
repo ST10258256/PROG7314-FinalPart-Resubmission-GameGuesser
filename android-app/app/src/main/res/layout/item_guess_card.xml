@@ -12,7 +12,7 @@
         android:id="@+id/guessTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/your_guess"
+        android:text="Your guess"
         android:textStyle="bold"
         android:textColor="@android:color/white"
         android:textSize="15sp"
