@@ -92,7 +92,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             keyWordStreakFlow.collect { streakValue ->
                 // This block runs on the main thread whenever keyWordStreakFlow is updated.
-                binding.keyWordsStreak.text = getString(R.string.key_words_streak, streakValue)
+                binding.keyWordsStreak.text = getString(R.string.key_words_streak, streakValue.text)
             }
 
         }
