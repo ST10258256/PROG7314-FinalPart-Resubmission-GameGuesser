@@ -1,100 +1,150 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">GameGuesser</string>
+    <string name="app_name">GameDevine</string>
     <string name="title_home">Accueil</string>
     <string name="title_dashboard">Tableau de bord</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_encyclopedia">Encyclopédie</string>
     <string name="title_chatbot">Chatbot</string>
     <string name="title_settings">Paramètres</string>
-    <string name="terms_content">Bienvenue sur Game Guesser !\n\nEn utilisant cette application, vous acceptez les conditions suivantes :\n\1. L\'application est fournie "telle quelle" sans aucune garantie.\n\2. Votre progression et vos données peuvent être stockées via votre compte Google.\n\3. La suppression de votre compte entraînera la suppression permanente de toute progression associée.\n\4. L\'application collecte des données minimales nécessaires à son fonctionnement.\n\5. Vous vous engagez à ne pas utiliser l\'application à mauvais escient ni à tenter de la pirater.\n\nVeuillez jouer de manière responsable et profiter du jeu !</string>
+    <string name="server_client_id">631177841661-nqjjhb58th6a55vsadrqg3u9i3oouihn.apps.googleusercontent.com</string>
+
+    <!-- terms -->
+    <string name="terms_content">
+        Bienvenue sur Game Devine !
+
+        En utilisant cette application, vous acceptez les conditions suivantes :
+
+        1. L\'application est fournie telle quelle, sans aucune garantie.
+        2. Votre progression et vos données peuvent être stockées via votre compte Google.
+        3. La suppression de votre compte supprimera définitivement toutes les données associées.
+        4. L'application collecte uniquement les données nécessaires à son fonctionnement.
+        5. Vous acceptez de ne pas utiliser l'application de manière abusive ou de tenter de la pirater.
+
+        Jouez de manière responsable et amusez-vous !
+    </string>
+
+    <!-- settings -->
     <string name="profile">Profil</string>
-    <string name="delete_account">Supprimer le Compte</string>
+    <string name="delete_account">Supprimer le compte</string>
     <string name="help_and_faqs">Aide et FAQ</string>
-    <string name="terms_and_conditions">Termes et Conditions</string>
+    <string name="terms_and_conditions">Conditions</string>
     <string name="languages">Langues</string>
-    <string name="logout">Déconnexion</string>
+    <string name="logout">Se déconnecter</string>
+
+    <!-- languages -->
     <string name="languages_title">Langues</string>
     <string name="afrikaans">Afrikaans</string>
     <string name="english">Anglais</string>
     <string name="spanish">Espagnol</string>
     <string name="french">Français</string>
-    <string name="zulu">Zoulou</string>
+    <string name="zulu">Zulu</string>
     <string name="german">Allemand</string>
-    <string name="save_selection">Enregistrer la Sélection</string>
+    <string name="save_selection">Enregistrer la sélection</string>
+
+    <!-- key game -->
     <string name="guess_left">Essais restants</string>
     <string name="guess_input_hint">Devinez le jeu</string>
     <string name="guess_button">Deviner</string>
     <string name="wrong">Faux</string>
-    <string name="invalid_response">Erreur : Réponse invalide</string>
+    <string name="invalid_response">Erreur : réponse invalide</string>
+
+    <!-- dashboard -->
     <string name="dashboard_title">Tableau de bord</string>
-    <string name="your_guess">Votre Suggestion : %s</string>
-    <string name="game_logo">Logo du Jeu</string>
-    <string name="welcome_text">Vous pensez connaître vos jeux ? Devinez, élaborez des stratégies et prouvez à quel point vos connaissances sont profondes dans GameGuesser !\nProposé par le Groupe 14.</string>
-    <string name="failure">Meilleure chance la prochaine fois</string>
-    <string name="congrats">Félicitations</string>
+    <string name="your_guess">Votre devinette : %s</string>
+
+    <!-- login -->
+    <string name="game_logo">Logo du jeu</string>
+    <string name="welcome_text">
+        Pensez-vous connaître vos jeux ? Devinez, planifiez et prouvez vos connaissances avec Game Devine !
+        Proposé par le Groupe 14.
+    </string>
+
+    <!-- Game strings-->
+    <string name="failure">Mieux vaut la prochaine fois</string>
+    <string name="congrats">Félicitations !</string>
     <string name="gameReveal">Le jeu était : %s</string>
-    <string name="consec_streak">Série Consécutive : %d</string>
+    <string name="consec_streak">Série consécutive : %d</string>
     <string name="user_guess">Vous avez deviné : %s</string>
-    <string name="welcome_title">Salut, Bon Retour</string>
+
+    <!-- home -->
+    <string name="welcome_title">Bonjour, bienvenue de retour</string>
     <string name="welcome_username_placeholder">Utilisateur</string>
-    <string name="welcome_description">Bienvenue sur Game Guesser ! Testez vos compétences en devinant des jeux.</string>
+    <string name="welcome_description">Bienvenue sur Game Devine ! Testez vos compétences en devinant des jeux.</string>
     <string name="key_words_title">Mots-clés</string>
     <string name="key_words_streak">Série : %d</string>
     <string name="play_button">Jouer</string>
+    <string name="compare_game_title" translatable="false">Comparer les jeux</string>
+
+    <!-- help -->
     <string name="help_faq_title">Aide et FAQ</string>
-    <string name="faq_q1">Comment jouer à Game Guesser ?</string>
-    <string name="faq_a1">Game Guesser est un jeu de puzzle où vous devinez des jeux à partir d\'indices. Gagnez des points et essayez d\'améliorer votre série !</string>
+    <string name="faq_q1">Comment jouer à Game Devine ?</string>
+    <string name="faq_a1">Game Devine est un jeu de devinettes où vous devez deviner des jeux à partir d\'indices. Gagnez des points et améliorez votre série !</string>
     <string name="faq_q2">Puis-je réinitialiser ma progression ?</string>
-    <string name="faq_a2">Actuellement, la progression ne peut pas être réinitialisée manuellement. Pour réinitialiser, vous devrez peut-être vous déconnecter et vous reconnecter avec un nouveau compte.</string>
+    <string name="faq_a2">Pour l\'instant, la progression ne peut pas être réinitialisée manuellement. Vous pouvez vous déconnecter et créer un nouveau compte pour recommencer.</string>
     <string name="faq_q3">Comment contacter le support ?</string>
-    <string name="faq_a3">Vous pouvez contacter le support par e-mail à support@example.com. Nous répondrons dans les 48 heures.</string>
-    <string name="faq_q4">Combien coûte Game Guesser ?</string>
+    <string name="faq_a3">Vous pouvez contacter le support par e-mail à support@example.com. Nous répondrons sous 48 heures.</string>
+    <string name="faq_q4">Combien coûte Game Devine ?</string>
     <string name="faq_a4">Le jeu est gratuit</string>
-    <string name="faq_q5">Comment puis-je personnaliser Game Guesser ?</string>
-    <string name="faq_a5">La personnalisation est actuellement limitée, il n\'y a donc que le mode sombre.</string>
+    <string name="faq_q5">Comment puis-je personnaliser Game Devine ?</string>
+    <string name="faq_a5">La personnalisation est limitée pour le moment, seule le mode sombre est disponible.</string>
     <string name="faq_q6">Comment puis-je supprimer mon compte ?</string>
-    <string name="faq_a6">Utilisez l\'action de suppression de compte dans l\'onglet des paramètres, sous suppression de compte.</string>
-    <string name="faq_q7">Comment puis-je retrouver mon père ?</string>
-    <string name="faq_a7">Cette application ne peut pas vous aider à localiser des figures parentales disparues.</string>
+    <string name="faq_a6">Utilisez l\'action de suppression de compte dans les paramètres, dans la section compte.</string>
+    <string name="faq_q7">Comment puis-je retrouver mes parents ?</string>
+    <string name="faq_a7">Cette application ne peut pas vous aider à retrouver des parents disparus.</string>
+
+    <!-- encyclopedia -->
     <string name="encyclopedia">Encyclopédie</string>
-    <string name="edit_my_profile">Modifier Mon Profil</string>
-    <string name="content_user_profile">Profil Utilisateur</string>
+
+    <!-- edit profile -->
+    <string name="edit_my_profile">Modifier mon profil</string>
+    <string name="content_user_profile">Profil utilisateur</string>
     <string name="guest">Invité</string>
     <string name="username_label">Nom d\'utilisateur</string>
     <string name="username_hint">Nom d\'utilisateur</string>
-    <string name="phone_number_label">Numéro de Téléphone</string>
-    <string name="phone_number_hint">Numéro de Téléphone</string>
-    <string name="email_placeholder">utilisateur@email.com</string>
-    <string name="update_profile">Mettre à Jour le Profil</string>
-    <string name="account_deletion">Suppression du compte</string>
+    <string name="phone_number_label">Numéro de téléphone</string>
+    <string name="phone_number_hint">Numéro de téléphone</string>
+    <string name="email_placeholder">user@email.com</string>
+    <string name="update_profile">Mettre à jour le profil</string>
+
+    <!-- delete account -->
+    <string name="account_deletion">Supprimer le compte</string>
     <string name="delete_confirm_question">Êtes-vous sûr de vouloir supprimer votre compte ?</string>
-    <string name="delete_explanation">La suppression de votre profil supprimera définitivement toutes vos données personnelles et votre progression dans le jeu. Cette action ne peut pas être annulée.</string>
+    <string name="delete_explanation">La suppression de votre profil supprime définitivement toutes vos données personnelles et votre progression. Cette action est irréversible.</string>
     <string name="delete_my_account">Supprimer mon compte</string>
-    <string name="type_a_message">Écrivez un message</string>
+
+    <!-- chatbot -->
+    <string name="type_a_message">Tapez un message</string>
     <string name="send">Envoyer</string>
-    <string name="filter_games">Filtrer les Jeux</string>
+
+    <!-- filter -->
+    <string name="filter_games">Filtrer les jeux</string>
     <string name="genre">Genre</string>
     <string name="platform">Plateforme</string>
     <string name="pov">POV</string>
-    <string name="apply_filters">Appliquer les Filtres</string>
+    <string name="apply_filters">Appliquer les filtres</string>
+
+    <!-- game end -->
     <string name="congratulations">Félicitations !</string>
     <string name="play_again">Rejouer</string>
-    <string name="main_menu">Menu Principal</string>
-    <string name="game_cover">Couverture du Jeu</string>
-    <string name="genre_label">Genre :</string>
-    <string name="platforms_label">Plateformes :</string>
-    <string name="release_year_label">Année de Sortie :</string>
-    <string name="developer_label">Développeur :</string>
-    <string name="publisher_label">Éditeur :</string>
-    <string name="budget_label">Budget :</string>
-    <string name="saga_label">Saga :</string>
-    <string name="pov_label">POV :</string>
-    <string name="add_game">Ajouter un Jeu</string>
-    <string name="game_name">Nom du Jeu</string>
-    <string name="select_platforms">Sélectionner les Plateformes</string>
+    <string name="main_menu">Menu principal</string>
+
+    <!-- game detail -->
+    <string name="game_cover">Couverture du jeu</string>
+    <string name="genre_label">Genre : </string>
+    <string name="platforms_label">Plateformes : </string>
+    <string name="release_year_label">Année de sortie : </string>
+    <string name="developer_label">Développeur : </string>
+    <string name="publisher_label">Éditeur : </string>
+    <string name="budget_label">Budget : </string>
+    <string name="saga_label">Saga : </string>
+    <string name="pov_label">POV : </string>
+
+    <!-- add game -->
+    <string name="add_game">Ajouter un jeu</string>
+    <string name="game_name">Nom du jeu</string>
+    <string name="select_platforms">Choisir les plateformes</string>
     <string name="no_platforms_selected">Aucune plateforme sélectionnée</string>
-    <string name="release_year">Année de Sortie</string>
+    <string name="release_year">Année de sortie</string>
     <string name="developer">Développeur</string>
     <string name="publisher">Éditeur</string>
     <string name="description">Description</string>
@@ -105,7 +155,7 @@
     <string name="clue_3">Indice 3</string>
     <string name="clue_4">Indice 4</string>
     <string name="clue_5">Indice 5</string>
-    <string name="cover_image_preview">Aperçu de la Couverture</string>
-    <string name="pick_cover_image">Appuyez pour choisir la couverture</string>
-    <string name="save_game">Enregistrer le Jeu</string>
+    <string name="cover_image_preview">Aperçu de l\'image de couverture</string>
+    <string name="pick_cover_image">Cliquez pour choisir l\'image de couverture</string>
+    <string name="save_game">Enregistrer le jeu</string>
 </resources>
