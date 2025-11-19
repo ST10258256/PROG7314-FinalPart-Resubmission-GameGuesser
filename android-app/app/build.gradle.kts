@@ -16,7 +16,7 @@ plugins {
 //    FileInputStream(localPropsFile).use { localProps.load(it) }
 //}
 //val openrouterKey: String = (localProps.getProperty("OPENROUTER_API_KEY") ?: "").trim()
-val openrouterKey = "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"
+val openrouterKey = "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"
 android {
     namespace = "com.example.gameguesser"
     compileSdk = 36
