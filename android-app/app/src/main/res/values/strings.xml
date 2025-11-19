@@ -56,7 +56,7 @@
     <!-- Game strings-->
     <string name="failure" translatable="false">Better luck next time</string>
     <string name="congrats" translatable="false">Congratulations</string>
-    <string name="gameReveal" translatable="false">The game was: </string>
+    <string name="gameReveal" translatable="false">The game was: %s</string>
 
     <!-- home -->
     <string name="welcome_title">Hi, Welcome Back</string>
