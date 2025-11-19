@@ -155,6 +155,9 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    // Biometric API
+    implementation ("androidx.biometric:biometric:1.1.0")
+
     // FIX: Exclude the old annotations module that conflicts with org.jetbrains:annotations
 //    implementation(platform("org.jetbrains.kotlin:kotlin-bom:1.8.0")) {
 //        exclude(group = "com.intellij", module = "annotations")
