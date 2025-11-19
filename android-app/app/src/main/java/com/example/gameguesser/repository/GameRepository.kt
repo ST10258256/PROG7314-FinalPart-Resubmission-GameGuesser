@@ -22,24 +22,19 @@ class GameRepository(
 
     private val gson = Gson()
 
-    // Convert any API response object into a Game instance via Gson serialization/deserialization.
-    // This avoids compile-time access to fields that may not exist on the response type.
     private fun convertToGame(obj: Any?): Game {
-        if (obj == null) return Game() // empty-but-valid Game
+        if (obj == null) return Game()
         return try {
             val json = gson.toJson(obj)
             gson.fromJson(json, Game::class.java)
         } catch (ex: Exception) {
-            // fallback: return an empty-but-valid Game
             Game()
         }
     }
 
-    // Convert API response (which might be a list of mixed objects) into List<Game>
     private fun convertToGameList(obj: Any?): List<Game> {
         if (obj == null) return emptyList()
         return try {
-            // If obj is already a List<*>, serialize it to JSON and then parse as List<Game>
             val json = gson.toJson(obj)
             val listType = object : TypeToken<List<Game>>() {}.type
             gson.fromJson(json, listType) ?: emptyList()
@@ -48,15 +43,10 @@ class GameRepository(
         }
     }
 
-    /**
-     * Ensure each Game has a usable primary key (id) before inserting into Room.
-     * Constructs a fresh Game instance for each input (avoids relying on copy() that may not be safe).
-     */
     private fun sanitizeGames(list: List<Game>): List<Game> {
         return list.map { original ->
             val g = Game()
             g._id = original._id
-            // prefer explicit id, then _id.oid, then fallback hash-based id
             g.id = when {
                 !original.id.isNullOrBlank() -> original.id
                 !original._id?.oid.isNullOrBlank() -> original._id!!.oid
@@ -64,7 +54,7 @@ class GameRepository(
             }
             g.name = original.name
             g.genre = original.genre
-            g.platforms = original.platforms    ?: emptyList()
+            g.platforms = original.platforms ?: emptyList()
             g.releaseYear = original.releaseYear
             g.developer = original.developer
             g.publisher = original.publisher
@@ -79,44 +69,34 @@ class GameRepository(
         }
     }
 
-    // Get random game (offline-safe)
     suspend fun getRandomGame(): Game? = withContext(Dispatchers.IO) {
         try {
             if (NetworkUtils.isOnline(context)) {
                 val response = api.getRandomGame().execute()
                 val apiBody = response.body()
-                // Convert response body to Game in a safe, generic way
                 val game = convertToGame(apiBody)
-
-                // Insert mapped Game into Room (sanitize single item)
                 if (game != null) {
                     val sanitized = sanitizeGames(listOf(game))
                     dao.insertGame(sanitized.first())
                 }
-
                 return@withContext if (game != null && !game.id.isNullOrBlank()) game else dao.getAllGames().randomOrNull()
             } else {
                 dao.getAllGames().randomOrNull()
             }
-        } catch (ex: Exception) {
-            // On any failure, fall back to local DB
+        } catch (_: Exception) {
             dao.getAllGames().randomOrNull()
         }
     }
 
-    // Get game by ID (offline-safe)
     suspend fun getGameByIdOfflineSafe(id: String): Game? = withContext(Dispatchers.IO) {
         val localGame = dao.getGameById(id)
         if (localGame != null) return@withContext localGame
 
         if (NetworkUtils.isOnline(context)) {
             try {
-                // Try to fetch a single game from API. If API doesn't provide get-by-id, we attempt random.
-                // Note: keep generic conversion to avoid compile-time field assumptions.
                 val response = try {
-                    api.getGameById(id).execute() // if your ApiService has this endpoint, good
+                    api.getGameById(id).execute()
                 } catch (_: Exception) {
-                    // fallback to random if getById isn't supported by ApiService
                     api.getRandomGame().execute()
                 }
                 val apiBody = response.body()
@@ -127,7 +107,7 @@ class GameRepository(
                     return@withContext sanitized.first()
                 }
                 return@withContext dao.getGameById(id)
-            } catch (ex: Exception) {
+            } catch (_: Exception) {
                 return@withContext dao.getGameById(id)
             }
         } else {
@@ -135,10 +115,8 @@ class GameRepository(
         }
     }
 
-    // Sync all games from API into local DB (offline-safe)
     suspend fun syncFromApi() = withContext(Dispatchers.IO) {
         if (!NetworkUtils.isOnline(context)) return@withContext
-
         try {
             val response = api.getAllGamesFull().execute()
             val body = response.body()
@@ -147,12 +125,9 @@ class GameRepository(
                 val sanitized = sanitizeGames(games)
                 dao.insertGames(sanitized)
             }
-        } catch (_: Exception) {
-            // silently ignore network problems
-        }
+        } catch (_: Exception) { }
     }
 
-    // Get all games (prefers local DB, falls back to API)
     suspend fun getAllGames(): List<Game> = withContext(Dispatchers.IO) {
         val localGames = dao.getAllGames()
         if (localGames.isNotEmpty()) return@withContext localGames
@@ -173,7 +148,6 @@ class GameRepository(
         }
     }
 
-    // Simple keyword search on local DB
     suspend fun findGamesByKeyword(keyword: String): List<Game> = withContext(Dispatchers.IO) {
         val allGames = dao.getAllGames()
         if (keyword.isBlank()) allGames
@@ -183,7 +157,6 @@ class GameRepository(
         }
     }
 
-    // Submit guess to API (if online)
     suspend fun submitGuess(gameId: String, guess: String): GuessResponse? =
         withContext(Dispatchers.IO) {
             if (!NetworkUtils.isOnline(context)) return@withContext null
@@ -195,20 +168,37 @@ class GameRepository(
             }
         }
 
-    // Compare guess (online via API or offline local heuristic)
+    /**
+     * Compare guess online, or fallback to offline heuristic:
+     * - matches map: only keywords that are exact or partial (contain/contained) are included
+     * - correct = exact keyword match OR guess equals game.name (case-insensitive)
+     */
     suspend fun compareGame(request: CompareRequest): ComparisonResponse? {
         return try {
             if (NetworkUtils.isOnline(context)) {
                 val response = RetrofitClient.api.compareGame(request).execute()
                 response.body()
             } else {
+                // offline fallback: use local DB game data to compute matches
                 val game = getGameByIdOfflineSafe(request.gameId)
                 val matches = mutableMapOf<String, String>()
+                val guessNormalized = request.guessName.trim()
                 game?.keywords?.forEach { keyword ->
-                    matches[keyword] = if (keyword.equals(request.guessName, ignoreCase = true)) "exact" else "partial"
+                    val k = keyword.trim()
+                    if (k.equals(guessNormalized, ignoreCase = true)) {
+                        matches[k] = "exact"
+                    } else if (k.contains(guessNormalized, ignoreCase = true) ||
+                        guessNormalized.contains(k, ignoreCase = true)
+                    ) {
+                        matches[k] = "partial"
+                    }
                 }
+
+                val correct = (game?.name?.trim()?.equals(guessNormalized, ignoreCase = true) == true)
+                        || matches.any { it.value == "exact" }
+
                 ComparisonResponse(
-                    correct = matches.any { it.value == "exact" },
+                    correct = correct,
                     matches = matches
                 )
             }

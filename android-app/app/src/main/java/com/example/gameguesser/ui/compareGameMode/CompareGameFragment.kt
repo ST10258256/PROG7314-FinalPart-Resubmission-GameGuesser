@@ -59,13 +59,11 @@ class CompareGameFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_compare_game, container, false)
 
-        // Initialize DBs and repository
         userDb = UserDatabase.getDatabase(requireContext())
         userDao = userDb.userDao()
         val gameDao = AppDatabase.getDatabase(requireContext()).gameDao()
         repository = GameRepository(gameDao, RetrofitClient.api, requireContext())
 
-        // UI elements
         resultText = view.findViewById(R.id.resultText)
         guessInput = view.findViewById(R.id.guessInput)
         guessButton = view.findViewById(R.id.guessButton)
@@ -76,7 +74,6 @@ class CompareGameFragment : Fragment() {
         adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, allGames)
         guessInput.setAdapter(adapter)
 
-        // Initialize hearts
         hearts.clear()
         for (i in 0 until maxLives) {
             val heart = heartsContainer.getChildAt(i) as ImageView
@@ -86,7 +83,6 @@ class CompareGameFragment : Fragment() {
         fetchAllGames()
         fetchRandomGame()
 
-        // AutoComplete filter
         guessInput.addTextChangedListener { editable ->
             val input = editable.toString()
             val filtered = allGames.filter { it.contains(input, ignoreCase = true) }
@@ -97,7 +93,7 @@ class CompareGameFragment : Fragment() {
         }
 
         guessButton.setOnClickListener {
-            val guess = guessInput.text.toString()
+            val guess = guessInput.text.toString().trim()
             if (guess.isBlank()) {
                 Toast.makeText(requireContext(), "Enter a guess", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -109,7 +105,6 @@ class CompareGameFragment : Fragment() {
         return view
     }
 
-    // Fetch all games
     private fun fetchAllGames() {
         lifecycleScope.launch(Dispatchers.IO) {
             val games = if (NetworkUtils.isOnline(requireContext())) {
@@ -131,8 +126,6 @@ class CompareGameFragment : Fragment() {
         }
     }
 
-
-    // Fetch random game
     private fun fetchRandomGame() {
         lifecycleScope.launch(Dispatchers.IO) {
             val game = repository.getRandomGame()
@@ -153,24 +146,26 @@ class CompareGameFragment : Fragment() {
         }
     }
 
-
-    // Submit guess
     private fun submitGuess(gameId: String, guess: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             val response: ComparisonResponse? = try {
-                // Online or offline via repository
                 repository.compareGame(CompareRequest(gameId, guess))
             } catch (_: Exception) {
-                // In case repository fails, fallback offline
+                // Fallback: try offline heuristic via repository.getGameByIdOfflineSafe
                 val game = repository.getGameByIdOfflineSafe(gameId)
                 val matches = mutableMapOf<String, String>()
+                val gNormalized = guess.trim()
                 game?.keywords?.forEach { keyword ->
-                    matches[keyword] = if (keyword.equals(guess, ignoreCase = true)) "exact" else "partial"
+                    val k = keyword.trim()
+                    if (k.equals(gNormalized, ignoreCase = true)) {
+                        matches[k] = "exact"
+                    } else if (k.contains(gNormalized, ignoreCase = true) || gNormalized.contains(k, ignoreCase = true)) {
+                        matches[k] = "partial"
+                    }
                 }
-                ComparisonResponse(
-                    correct = matches.any { it.value == "exact" },
-                    matches = matches
-                )
+                val correct = (game?.name?.trim()?.equals(gNormalized, ignoreCase = true) == true)
+                        || matches.any { it.value == "exact" }
+                ComparisonResponse(correct = correct, matches = matches)
             }
 
             val matches = response?.matches ?: emptyMap()
@@ -182,9 +177,6 @@ class CompareGameFragment : Fragment() {
         }
     }
 
-
-
-    // Update UI with guess result
     private fun processComparisonResult(matches: Map<String, String>, correct: Boolean) {
         val card = layoutInflater.inflate(R.layout.item_guess_card, null)
         val guessTitle = card.findViewById<TextView>(R.id.guessTitle)
@@ -192,6 +184,7 @@ class CompareGameFragment : Fragment() {
 
         guessTitle.text = "You guessed: ${guessInput.text}"
 
+        // Only show matches that exist (exact or partial)
         for ((key, status) in matches) {
             val chipView = layoutInflater.inflate(R.layout.item_match_chip, null)
             val chip = chipView.findViewById<TextView>(R.id.matchChip)
@@ -214,8 +207,6 @@ class CompareGameFragment : Fragment() {
         }
     }
 
-
-    // Heart management
     private fun loseHeart() {
         if (hearts.isNotEmpty()) {
             val lastHeart = hearts.removeAt(hearts.size - 1)
@@ -249,8 +240,6 @@ class CompareGameFragment : Fragment() {
         keywordsChipGroup.addView(chip)
     }
 
-
-    // End game dialog and streak
     private fun showEndGameDialog(won: Boolean, gameName: String, coverUrl: String?) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_end_game, null)
         val imageView = dialogView.findViewById<ImageView>(R.id.gameCoverImage)
@@ -302,8 +291,6 @@ class CompareGameFragment : Fragment() {
         fetchRandomGame()
     }
 
-
-    // Helpers
     private fun isToday(timestamp: Long): Boolean {
         if (timestamp == 0L) return false
         val cal = Calendar.getInstance().apply { timeInMillis = timestamp }
