@@ -21,14 +21,15 @@ class GameConverters {
     }
 
     @TypeConverter
-    fun fromIdObject(idObject: IdObject?): String? {
-        return idObject?.let { Gson().toJson(it) }
+    fun fromIdObject(value: IdObject?): String? {
+        return value?.oid
     }
 
     @TypeConverter
     fun toIdObject(value: String?): IdObject? {
-        return value?.let { Gson().fromJson(it, IdObject::class.java) }
+        return if (value == null) null else IdObject(value)
     }
+
 
 }
 

@@ -36,6 +36,9 @@ data class Game(
     val mongoId: String
         get() = _id?.oid ?: id
 
+    val safeId: String
+        get() = if (id.isNotBlank()) id else _id?.oid ?: ""
+
     constructor() : this(_id = null)
 }
 

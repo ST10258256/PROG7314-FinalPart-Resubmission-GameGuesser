@@ -11,31 +11,39 @@ object RetrofitClient {
     private const val BASE_URL = "https://gameguesser-api.onrender.com/"
 
     val gson = GsonBuilder()
-        .registerTypeAdapter(object : TypeToken<List<Game>>() {}.type, JsonDeserializer { json, _, _ ->
-            val arr = json.asJsonArray
-            arr.map { element ->
-                val jsonObj = element.asJsonObject
-                val idObject = jsonObj["_id"]?.asJsonObject
-                val mongoId = idObject?.get("\$oid")?.asString ?: ""
-                Game(
-                    _id = if (mongoId.isNotEmpty()) IdObject(mongoId) else null,
-                    id = mongoId,
-                    name = jsonObj["name"]?.asString ?: "",
-                    genre = jsonObj["genre"]?.asString ?: "",
-                    platforms = jsonObj["platforms"]?.asJsonArray?.map { it.asString } ?: emptyList(),
-                    releaseYear = jsonObj["releaseYear"]?.asInt ?: 0,
-                    developer = jsonObj["developer"]?.asString ?: "",
-                    publisher = jsonObj["publisher"]?.asString ?: "",
-                    description = jsonObj["description"]?.asString ?: "",
-                    coverImageUrl = jsonObj["coverImageUrl"]?.asString ?: "",
-                    budget = jsonObj["budget"]?.asString ?: "",
-                    saga = jsonObj["saga"]?.asString ?: "",
-                    pov = jsonObj["pov"]?.asString ?: "",
-                    clues = jsonObj["clues"]?.asJsonArray?.map { it.asString } ?: emptyList(),
-                    keywords = jsonObj["keywords"]?.asJsonArray?.map { it.asString } ?: emptyList()
-                )
+        .registerTypeAdapter(object : TypeToken<List<Game>>() {}.type,
+            JsonDeserializer { json, _, _ ->
+
+                // The API wraps the array in { "message": "...", "data": [ ... ] }
+                val rootObj = json.asJsonObject
+
+                val dataArray = rootObj["data"]?.asJsonArray
+                    ?: return@JsonDeserializer emptyList<Game>()
+
+                dataArray.map { element ->
+                    val jsonObj = element.asJsonObject
+                    val idObject = jsonObj["_id"]?.asJsonObject
+                    val mongoId = idObject?.get("\$oid")?.asString ?: ""
+                    Game(
+                        _id = if (mongoId.isNotEmpty()) IdObject(mongoId) else null,
+                        id = mongoId,
+                        name = jsonObj["name"]?.asString ?: "",
+                        genre = jsonObj["genre"]?.asString ?: "",
+                        platforms = jsonObj["platforms"]?.asJsonArray?.map { it.asString } ?: emptyList(),
+                        releaseYear = jsonObj["releaseYear"]?.asInt ?: 0,
+                        developer = jsonObj["developer"]?.asString ?: "",
+                        publisher = jsonObj["publisher"]?.asString ?: "",
+                        description = jsonObj["description"]?.asString ?: "",
+                        coverImageUrl = jsonObj["coverImageUrl"]?.asString ?: "",
+                        budget = jsonObj["budget"]?.asString ?: "",
+                        saga = jsonObj["saga"]?.asString ?: "",
+                        pov = jsonObj["pov"]?.asString ?: "",
+                        clues = jsonObj["clues"]?.asJsonArray?.map { it.asString } ?: emptyList(),
+                        keywords = jsonObj["keywords"]?.asJsonArray?.map { it.asString } ?: emptyList()
+                    )
+                }
             }
-        })
+        )
         .create()
 
 
