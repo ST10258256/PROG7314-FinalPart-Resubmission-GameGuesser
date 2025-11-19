@@ -87,36 +87,36 @@ class GameRepository(
     // Sync all games from API
     suspend fun syncFromApi() = withContext(Dispatchers.IO) {
         if (!NetworkUtils.isOnline(context)) return@withContext
+
         try {
-            val response = api.getRandomGame().execute()
-            val apiGame = response.body()
-            val game = apiGame?.let { mapRandomGameResponseToGame(it) }
-            game?.let { dao.insertGame(it) }
+            val response = api.getAllGamesFull().execute()
+            if (response.isSuccessful) {
+                val games = response.body() ?: emptyList()
+                dao.insertGames(games)
+            }
         } catch (_: Exception) {}
     }
+
 
 
 
     // Other functions remain offline-safe
     suspend fun getAllGames(): List<Game> = withContext(Dispatchers.IO) {
         val localGames = dao.getAllGames()
+
         if (localGames.isNotEmpty()) return@withContext localGames
 
+        // If DB empty → fetch full list
         return@withContext try {
-            if (NetworkUtils.isOnline(context)) {
-                val response = api.getRandomGame().execute()
-                val apiGame = response.body()
-                val game = apiGame?.let { mapRandomGameResponseToGame(it) }
-                game?.let { dao.insertGame(it) }
-
-                game?.let { listOf(it) } ?: emptyList()
-            } else {
-                emptyList()
-            }
+            val response = api.getAllGamesFull().execute()
+            val games = response.body() ?: emptyList()
+            dao.insertGames(games)
+            games
         } catch (_: Exception) {
             emptyList()
         }
     }
+
 
 
 
