@@ -22,6 +22,7 @@ import com.example.gameguesser.utils.NetworkUtils
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -30,6 +31,8 @@ class KeyGameFragment : Fragment() {
     private lateinit var userDb: UserDatabase
     private lateinit var userDao: UserDao
     private lateinit var repository: GameRepository
+
+    private val consecutiveStreakFlow = MutableStateFlow(0)
 
     private var currentGame: com.example.gameguesser.data.Game? = null
 
@@ -204,20 +207,68 @@ class KeyGameFragment : Fragment() {
         val titleText = dialogView.findViewById<TextView>(R.id.dialogTitle)
         val playAgainBtn = dialogView.findViewById<Button>(R.id.playAgainButton)
         val mainMenuBtn = dialogView.findViewById<Button>(R.id.mainMenuButton)
-
-        titleText.text = if (won) "Congratulations" else "Better luck next time"
+        val nameText = dialogView.findViewById<TextView>(R.id.gameName)
+        val consecutiveStreak = dialogView.findViewById<TextView>(R.id.consecutiveStreakTitle)
 
         if (won) {
+            titleText.text = getString(R.string.congrats)
             lifecycleScope.launch(Dispatchers.IO) {
-                val userId = getLoggedInUserId() ?: return@launch
-                val user = userDao.getUser(userId) ?: return@launch
+                val userId = getLoggedInUserId() // You need a function to get the current user's ID
+                if (userId == null) return@launch
 
-                if (!isToday(user.lastPlayedKW)) user.streakKW += 1
-                if (user.streakKW > user.bestStreakKW) user.bestStreakKW = user.streakKW
-                user.lastPlayedKW = System.currentTimeMillis()
-                userDao.updateUser(user)
+                val user = userDao.getUser(userId)
+                if (user != null) {
+                    // Check if the last win was on a different day
+                    if (!isToday(user.lastPlayedKW)) {
+                        user.streakKW += 1 // Increment the streak
+                    }
+                    // Update the best streak if the current one is higher
+                    if (user.streakKW > user.bestStreakKW) {
+                        user.bestStreakKW = user.streakKW
+                    }
+
+                    user.consecStreakKW += 1 // Increment the consecutive streak
+                    withContext(Dispatchers.Main) {
+                        consecutiveStreak.text = getString(R.string.consec_streak, user.consecStreakKW)
+                    }
+
+                    // Update the last played date to now
+                    user.lastPlayedKW = System.currentTimeMillis()
+
+                    // Save the updated user back to the database
+                    userDao.updateUser(user)
+
+                    // You can update the UI on the main thread
+                    withContext(Dispatchers.Main) {
+                        // e.g., Toast.makeText(context, "Streak: ${user.streakCG}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+            }
+        } else {
+            titleText.text = getString(R.string.failure)
+            lifecycleScope.launch(Dispatchers.IO) {
+                val userId = getLoggedInUserId() // You need a function to get the current user's ID
+                if (userId == null) return@launch
+
+                val user = userDao.getUser(userId)
+                if (user != null) {
+
+                    user.consecStreakKW = 0 // Increment the consecutive streak
+                    //adding values to stateflow
+                    consecutiveStreakFlow.value = user.consecStreakKW
+                }
             }
         }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            consecutiveStreakFlow.collect { streakValue ->
+                // This block runs on the main thread whenever keyWordStreakFlow is updated.
+                consecutiveStreak.text = getString(R.string.consec_streak, streakValue)
+            }
+
+        }
+        nameText.text = getString(R.string.gameReveal, gameName)
 
         coverUrl?.let { Glide.with(this).load(it).into(imageView) }
 

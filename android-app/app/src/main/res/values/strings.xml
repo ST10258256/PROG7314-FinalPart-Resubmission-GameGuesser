@@ -56,7 +56,7 @@
     <!-- Game strings-->
     <string name="failure" translatable="false">Better luck next time</string>
     <string name="congrats" translatable="false">Congratulations</string>
-    <string name="gameReveal" translatable="false">The game was: </string>
+    <string name="gameReveal" translatable="false">The game was: %s</string>
 
     <!-- home -->
     <string name="welcome_title">Hi, Welcome Back</string>
@@ -154,4 +154,227 @@
     <string name="pick_cover_image">Tap to pick cover image</string>
     <string name="save_game">Save Game</string>
 
+
+    <!-- <string name="title_home">Tuis</string> -->
+
+    <!-- <string name="title_notifications">Kennisgewings</string> -->
+
+    <!-- <string name="title_encyclopedia">Ensiklopedie</string> -->
+
+    <!-- <string name="title_chatbot">Kletsbot</string> -->
+
+    <!-- <string name="title_settings">Instellings</string> -->
+
+    <!-- <string name="terms_content">Welkom by Game Guesser!\n\nDeur hierdie toepassing te gebruik, stem
+        jy in tot die volgende bepalings:\n\1. Die toepassing word verskaf soos dit is, sonder enige
+        waarborge.\n\2. Jou vordering en data kan via jou Google-rekening gestoor word.\n\3. Die
+        verwydering van jou rekening sal alle geassosieerde vordering permanent verwyder.\n\4. Die
+        toepassing samel minimale data in wat nodig is vir funksionaliteit.\n\5. Jy stem in om nie
+        die toepassing te misbruik of te probeer hack nie.\n\Speel asseblief verantwoordelik en
+        geniet die speletjie!
+    </string> -->
+
+    <!-- <string name="profile">Profiel</string> -->
+
+    <!-- <string name="delete_account">Vee Rekening uit</string> -->
+
+    <!-- <string name="help_and_faqs">Hulp en Gereelde Vrae</string> -->
+
+    <!-- <string name="terms_and_conditions">Bepalings en Voorwaardes</string> -->
+
+    <!-- <string name="languages">Tale</string> -->
+
+    <!-- <string name="logout">Teken uit</string> -->
+
+    <!-- <string name="languages_title">Tale</string> -->
+
+    <!-- <string name="english">Engels</string> -->
+
+    <!-- <string name="spanish">Spaans</string> -->
+
+    <!-- <string name="french">Frans</string> -->
+
+    <!-- <string name="zulu">Zoeloe</string> -->
+
+    <!-- <string name="german">Duits</string> -->
+
+    <!-- <string name="save_selection">Stoor Keuse</string> -->
+
+    <!-- <string name="guess_left">Raaie oor</string> -->
+
+    <!-- <string name="guess_input_hint">Raai die speletjie</string> -->
+
+    <!-- <string name="guess_button">Raai</string> -->
+
+    <!-- <string name="wrong">Verkeerd</string> -->
+
+    <!-- <string name="invalid_response">Fout: Ongeldige respons</string> -->
+
+    <!-- <string name="your_guess">Jou Raaiskoot: %s</string> -->
+
+    <!-- <string name="game_logo">Speletjie-logo</string> -->
+
+    <!-- <string name="welcome_text">Dink jy jy ken jou speletjies? Raai, strategieseer, en bewys hoe
+        diep jou kennis strek in GameGuesser!\nAangebied deur Groep 14.
+    </string> -->
+
+    <!-- <string name="failure">Beter geluk volgende keer</string> -->
+
+    <!-- <string name="congrats">Geluk</string> -->
+
+    <!-- <string name="gameReveal">Die speletjie was: %s</string> -->
+
+    <!-- <string name="consec_streak">Opeenvolgende Reeks: %d</string> -->
+
+    <!-- <string name="user_guess">Jy het geraai: %s</string> -->
+
+    <!-- <string name="welcome_title">Hi, Welkom Terug</string> -->
+
+    <!-- <string name="welcome_username_placeholder">Gebruiker</string> -->
+
+    <!-- <string name="welcome_description">Welkom by Game Guesser! Toets jou vaardighede deur speletjies
+        te raai.
+    </string> -->
+
+    <!-- <string name="key_words_title">Sleutelwoorde</string> -->
+
+    <!-- <string name="key_words_streak">Reeks: %d</string> -->
+
+    <!-- <string name="play_button">Speel</string> -->
+
+    <!-- <string name="help_faq_title">Hulp en Gereelde Vrae</string> -->
+
+    <!-- <string name="faq_q1">Hoe speel ek Game Guesser?</string> -->
+
+    <!-- <string name="faq_a1">Game Guesser is \'n legkaartspeletjie waar jy speletjies raai gebaseer op
+        leidrade. Verdien punte en probeer jou reeks verbeter!
+    </string> -->
+
+    <!-- <string name="faq_q2">Kan ek my vordering terugstel?</string> -->
+
+    <!-- <string name="faq_a2">Tans kan vordering nie handmatig teruggestel word nie. Om terug te stel,
+        moet jy dalk uitteken en met \'n nuwe rekening inteken.
+    </string> -->
+
+    <!-- <string name="faq_q3">Hoe kontak ek ondersteuning?</string> -->
+
+    <!-- <string name="faq_a3">Jy kan ondersteuning per e-pos kontak by support@example.com. Ons sal
+        binne 48 uur antwoord.
+    </string> -->
+
+    <!-- <string name="faq_q4">Hoeveel kos Game Guesser?</string> -->
+
+    <!-- <string name="faq_a4">Die speletjie is gratis</string> -->
+
+    <!-- <string name="faq_q5">Hoe pas ek Game Guesser aan?</string> -->
+
+    <!-- <string name="faq_a5">Aanpassing is tans beperk, so daar is tans net donkermodus.</string> -->
+
+    <!-- <string name="faq_q6">Hoe vee ek my rekening uit?</string> -->
+
+    <!-- <string name="faq_a6">Gebruik die rekeninguitvee-aksie in die instellings-oortjie onder
+        rekeninguitvee.
+    </string> -->
+
+    <!-- <string name="faq_q7">Hoe vind ek my pa?</string> -->
+
+    <!-- <string name="faq_a7">Hierdie toepassing kan jou nie help om enige vermiste ouerlike figure op
+        te spoor nie.
+    </string> -->
+
+    <!-- <string name="encyclopedia">Ensiklopedie</string> -->
+
+    <!-- <string name="edit_my_profile">Wysig My Profiel</string> -->
+
+    <!-- <string name="content_user_profile">Gebruikersprofiel</string> -->
+
+    <!-- <string name="guest">Gas</string> -->
+
+    <!-- <string name="username_label">Gebruikersnaam</string> -->
+
+    <!-- <string name="username_hint">Gebruikersnaam</string> -->
+
+    <!-- <string name="phone_number_label">Telefoonnommer</string> -->
+
+    <!-- <string name="phone_number_hint">Telefoonnommer</string> -->
+
+    <!-- <string name="email_placeholder">gebruiker@epos.com</string> -->
+
+    <!-- <string name="update_profile">Dateer Profiel op</string> -->
+
+    <!-- <string name="account_deletion">Rekeninguitvee</string> -->
+
+    <!-- <string name="delete_confirm_question">Is jy seker jy wil jou rekening uitvee?</string> -->
+
+    <!-- <string name="delete_explanation">Die uitvee van jou profiel sal al jou persoonlike data en
+        speletjievordering permanent verwyder. Hierdie aksie kan nie ongedaan gemaak word nie.
+    </string> -->
+
+    <!-- <string name="delete_my_account">Vee my rekening uit</string> -->
+
+    <!-- <string name="type_a_message">Tik \'n boodskap</string> -->
+
+    <!-- <string name="send">Stuur</string> -->
+
+    <!-- <string name="filter_games">Filtreer Speletjies</string> -->
+
+    <!-- <string name="apply_filters">Pas Filters toe</string> -->
+
+    <!-- <string name="congratulations">Geluk!</string> -->
+
+    <!-- <string name="play_again">Speel Weer</string> -->
+
+    <!-- <string name="main_menu">Hoofmenu</string> -->
+
+    <!-- <string name="game_cover">Speletjie-omslag</string> -->
+
+    <!-- <string name="genre_label">Genre:</string> -->
+
+    <!-- <string name="platforms_label">Platforms:</string> -->
+
+    <!-- <string name="release_year_label">Vrystellingsjaar:</string> -->
+
+    <!-- <string name="developer_label">Ontwikkelaar:</string> -->
+
+    <!-- <string name="publisher_label">Uitgewer:</string> -->
+
+    <!-- <string name="budget_label">Begroting:</string> -->
+
+    <!-- <string name="saga_label">Saga:</string> -->
+
+    <!-- <string name="pov_label">POV:</string> -->
+
+    <!-- <string name="add_game">Voeg Speletjie by</string> -->
+
+    <!-- <string name="game_name">Speletjienaam</string> -->
+
+    <!-- <string name="select_platforms">Kies Platforms</string> -->
+
+    <!-- <string name="no_platforms_selected">Geen platforms gekies nie</string> -->
+
+    <!-- <string name="release_year">Vrystellingsjaar</string> -->
+
+    <!-- <string name="developer">Ontwikkelaar</string> -->
+
+    <!-- <string name="publisher">Uitgewer</string> -->
+
+    <!-- <string name="description">Beskrywing</string> -->
+
+    <!-- <string name="budget">Begroting</string> -->
+
+    <!-- <string name="clue_1">Leidraad 1</string> -->
+
+    <!-- <string name="clue_2">Leidraad 2</string> -->
+
+    <!-- <string name="clue_3">Leidraad 3</string> -->
+
+    <!-- <string name="clue_4">Leidraad 4</string> -->
+
+    <!-- <string name="clue_5">Leidraad 5</string> -->
+
+    <!-- <string name="cover_image_preview">Omslagbeeldvoorskou</string> -->
+
+    <!-- <string name="pick_cover_image">Tik om omslagbeeld te kies</string> -->
+
+    <!-- <string name="save_game">Stoor Speletjie</string> -->
 </resources>
