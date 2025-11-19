@@ -39,12 +39,12 @@ class EncyclopediaFragment : Fragment() {
     private var allGames = listOf<Game>()
 
     private val genreOptions = listOf(
-        "All", "Action", "Action-Adventure", "Action‑RPG", "Battle Royale",
+        "All", "Action", "Action-Adventure", "Action-RPG", "Battle Royale",
         "Card Battle", "Co-op Adventure", "Fashion", "Fighting",
         "First-Person Shooter", "Fitness", "Life Simulation", "MOBA",
         "Metroidvania", "RPG", "Racing", "Real Time Tactics", "Retro",
         "Roguelike", "Sandbox", "Soulslike", "Sports", "Stealth",
-        "Strategy", "Survival Horror", "Third‑Person Shooter", "Tower Defense",
+        "Strategy", "Survival Horror", "Third-Person Shooter", "Tower Defense",
         "Trivia", "Other"
     )
 
@@ -149,12 +149,13 @@ class EncyclopediaFragment : Fragment() {
                 adapter.updateGames(allGames)
                 Log.d("GAME_FETCH", "Loaded ${allGames.size} games")
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Failed to load games", Toast.LENGTH_SHORT).show()
-                Log.e("GAME_FETCH", "Error fetching games", e)
+                // Improved error reporting for debugging on device
+                val msg = "Failed to load games: ${e.message ?: e::class.java.simpleName}"
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+                Log.e("GAME_FETCH", msg, e)
             }
         }
     }
-
 
     private fun showFilterBottomSheet() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_filter, null)
