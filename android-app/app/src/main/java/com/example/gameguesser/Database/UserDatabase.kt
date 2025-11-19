@@ -6,9 +6,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.gameguesser.Class.LocalUser
 import com.example.gameguesser.Class.User
 import com.example.gameguesser.DAOs.LocalUserDao
+import com.example.gameguesser.Class.LocalUser
 import com.example.gameguesser.DAOs.UserDao
 
 @Database(entities = [User::class, LocalUser::class], version = 4, exportSchema = false)
