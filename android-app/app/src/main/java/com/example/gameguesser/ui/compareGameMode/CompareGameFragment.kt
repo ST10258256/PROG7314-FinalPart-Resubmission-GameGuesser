@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -201,9 +202,42 @@ class CompareGameFragment : Fragment() {
         comparisonContainer.addView(card, 0)
 
         if (correct) {
+            // Force increment compare streak
+            lifecycleScope.launch(Dispatchers.IO) {
+                forceIncrementCompareStreak()
+            }
             showEndGameDialog(true, currentGameName ?: "Unknown", currentGameCover)
         } else {
             loseHeart()
+        }
+    }
+
+    // FORCE increment at SQL level
+    private suspend fun forceIncrementCompareStreak() {
+        try {
+            val userId = getLoggedInUserId() ?: run {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "No userId saved; streak not recorded", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+            val now = System.currentTimeMillis()
+            val rows = userDao.incrementCompareStreak(userId, now)
+            if (rows == 0) {
+                // user row didn't exist: insert initial row with compare streak = 1
+                userDao.insertInitialUserForCompare(userId, now)
+            }
+            // read back user to show to UI
+            val updatedUser = userDao.getUser(userId)
+            withContext(Dispatchers.Main) {
+                val streak = updatedUser?.streakCG ?: 1
+                Toast.makeText(requireContext(), "🔥 +1 — Compare streak: $streak", Toast.LENGTH_SHORT).show()
+            }
+        } catch (ex: Exception) {
+            Log.e("CompareGameFragment", "forceIncrementCompareStreak error: ${ex.message}", ex)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Error updating streak", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -252,18 +286,6 @@ class CompareGameFragment : Fragment() {
         nameText.text = "The game was: $gameName"
 
         coverUrl?.let { Glide.with(this).load(it).into(imageView) }
-
-        if (won) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val userId = getLoggedInUserId() ?: return@launch
-                val user = userDao.getUser(userId) ?: return@launch
-
-                if (!isToday(user.lastPlayedCG)) user.streakCG += 1
-                if (user.streakCG > user.bestStreakCG) user.bestStreakCG = user.streakCG
-                user.lastPlayedCG = System.currentTimeMillis()
-                userDao.updateUser(user)
-            }
-        }
 
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)

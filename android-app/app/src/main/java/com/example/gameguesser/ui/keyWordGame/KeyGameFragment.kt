@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -159,6 +160,10 @@ class KeyGameFragment : Fragment() {
 
     private fun processGuessResult(correct: Boolean, hint: String?) {
         if (correct) {
+            // Force increment the DB streak
+            lifecycleScope.launch(Dispatchers.IO) {
+                forceIncrementKeywordStreak()
+            }
             showEndGameDialog(true, currentGame?.name ?: "Unknown", currentGame?.coverImageUrl)
         } else {
             if (hearts.isNotEmpty()) {
@@ -173,6 +178,35 @@ class KeyGameFragment : Fragment() {
                 guessInput.isEnabled = false
             } else {
                 Toast.makeText(requireContext(), "Hint: ${hint ?: "No hint"}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // FORCE increment at SQL level
+    private suspend fun forceIncrementKeywordStreak() {
+        try {
+            val userId = getLoggedInUserId() ?: run {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "No userId saved; streak not recorded", Toast.LENGTH_SHORT).show()
+                }
+                return
+            }
+            val now = System.currentTimeMillis()
+            val rows = userDao.incrementKeywordStreak(userId, now)
+            if (rows == 0) {
+                // user row didn't exist: insert initial row with streak = 1
+                userDao.insertInitialUserForKeyword(userId, now)
+            }
+            // read back user to show to UI
+            val updatedUser = userDao.getUser(userId)
+            withContext(Dispatchers.Main) {
+                val streak = updatedUser?.streakKW ?: 1
+                Toast.makeText(requireContext(), "🔥 +1 — Keyword streak: $streak", Toast.LENGTH_SHORT).show()
+            }
+        } catch (ex: Exception) {
+            Log.e("KeyGameFragment", "forceIncrementKeywordStreak error: ${ex.message}", ex)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Error updating streak", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -206,18 +240,6 @@ class KeyGameFragment : Fragment() {
         val mainMenuBtn = dialogView.findViewById<Button>(R.id.mainMenuButton)
 
         titleText.text = if (won) "Congratulations" else "Better luck next time"
-
-        if (won) {
-            lifecycleScope.launch(Dispatchers.IO) {
-                val userId = getLoggedInUserId() ?: return@launch
-                val user = userDao.getUser(userId) ?: return@launch
-
-                if (!isToday(user.lastPlayedKW)) user.streakKW += 1
-                if (user.streakKW > user.bestStreakKW) user.bestStreakKW = user.streakKW
-                user.lastPlayedKW = System.currentTimeMillis()
-                userDao.updateUser(user)
-            }
-        }
 
         coverUrl?.let { Glide.with(this).load(it).into(imageView) }
 
