@@ -243,6 +243,34 @@ class KeyGameFragment : Fragment() {
 
         coverUrl?.let { Glide.with(this).load(it).into(imageView) }
 
+        // If player lost, reset their keyword streak to 0 and store lastPlayedKW = now
+        if (!won) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val userId = getLoggedInUserId() ?: return@launch
+                    val user = userDao.getUser(userId)
+                    if (user != null) {
+                        user.streakKW = 0
+                        user.lastPlayedKW = System.currentTimeMillis()
+                        userDao.updateUser(user)
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(requireContext(), "Streak reset to 0", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (ex: Exception) {
+                    // optional: log
+                    Log.e("KeyGameFragment", "reset streak error: ${ex.message}", ex)
+                }
+            }
+        } else {
+            // On win we already increment elsewhere (no change here)
+            lifecycleScope.launch(Dispatchers.IO) {
+                val userId = getLoggedInUserId() ?: return@launch
+                val user = userDao.getUser(userId) ?: return@launch
+                if (!isToday(user.lastPlayedKW)) user.streakKW += 0 // no-op here; keep existing flow of increment handled in forceIncrementKeywordStreak()
+            }
+        }
+
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setCancelable(false)
@@ -260,6 +288,7 @@ class KeyGameFragment : Fragment() {
 
         dialog.show()
     }
+
 
     private fun resetGame() {
         keywordsChipGroup.removeAllViews()

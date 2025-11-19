@@ -287,6 +287,26 @@ class CompareGameFragment : Fragment() {
 
         coverUrl?.let { Glide.with(this).load(it).into(imageView) }
 
+        // If player lost, reset their compare-game streak to 0 and store lastPlayedCG = now
+        if (!won) {
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val userId = getLoggedInUserId() ?: return@launch
+                    val user = userDao.getUser(userId)
+                    if (user != null) {
+                        user.streakCG = 0
+                        user.lastPlayedCG = System.currentTimeMillis()
+                        userDao.updateUser(user)
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(requireContext(), "Compare streak reset to 0", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (ex: Exception) {
+                    Log.e("CompareGameFragment", "reset streak error: ${ex.message}", ex)
+                }
+            }
+        }
+
         val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
             .setCancelable(false)
@@ -296,6 +316,7 @@ class CompareGameFragment : Fragment() {
             dialog.dismiss()
             resetGame()
         }
+
         mainMenuBtn.setOnClickListener {
             dialog.dismiss()
             requireActivity().onBackPressed()
@@ -303,6 +324,7 @@ class CompareGameFragment : Fragment() {
 
         dialog.show()
     }
+
 
     private fun resetGame() {
         keywordsChipGroup.removeAllViews()
