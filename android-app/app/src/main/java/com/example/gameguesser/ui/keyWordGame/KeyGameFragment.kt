@@ -51,35 +51,29 @@ class KeyGameFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_key_game, container, false)
 
-        // Database & repository setup
         userDb = UserDatabase.getDatabase(requireContext())
         userDao = userDb.userDao()
         val gameDao = AppDatabase.getDatabase(requireContext()).gameDao()
         repository = GameRepository(gameDao, RetrofitClient.api, requireContext())
 
-        // UI references
         resultText = view.findViewById(R.id.resultText)
         guessInput = view.findViewById(R.id.guessInput)
         guessButton = view.findViewById(R.id.guessButton)
         keywordsChipGroup = view.findViewById(R.id.keywordsChipGroup)
         heartsContainer = view.findViewById(R.id.guessHeartsContainer)
 
-        // AutoComplete setup
         adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, allGames)
         guessInput.setAdapter(adapter)
 
-        // Initialize hearts
         hearts.clear()
         for (i in 0 until maxLives) {
             val heart = heartsContainer.getChildAt(i) as ImageView
             hearts.add(heart)
         }
 
-        // Fetch games & random game
         fetchAllGames()
         fetchRandomGame()
 
-        // AutoComplete filter
         guessInput.addTextChangedListener { editable ->
             val input = editable.toString()
             val filtered = allGames.filter { it.contains(input, ignoreCase = true) }
@@ -89,9 +83,8 @@ class KeyGameFragment : Fragment() {
             guessInput.showDropDown()
         }
 
-        // Guess button
         guessButton.setOnClickListener {
-            val guess = guessInput.text.toString()
+            val guess = guessInput.text.toString().trim()
             if (guess.isBlank()) {
                 Toast.makeText(requireContext(), "Enter a guess", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -103,8 +96,6 @@ class KeyGameFragment : Fragment() {
         return view
     }
 
-
-    // Fetch all games (Offline-Ready)
     private fun fetchAllGames() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
@@ -127,7 +118,6 @@ class KeyGameFragment : Fragment() {
         }
     }
 
-    // Fetch random game
     private fun fetchRandomGame() {
         lifecycleScope.launch(Dispatchers.IO) {
             val game = repository.getRandomGame()
@@ -144,15 +134,21 @@ class KeyGameFragment : Fragment() {
         }
     }
 
-
-    // Submit guess (Offline)
     private fun submitGuess(game: com.example.gameguesser.data.Game, guess: String) {
         lifecycleScope.launch(Dispatchers.IO) {
             val response = if (NetworkUtils.isOnline(requireContext())) {
                 repository.submitGuess(game.id, guess)
             } else null
 
-            val correct = response?.correct ?: game.keywords.any { it.equals(guess, true) }
+            // Offline fallback: treat guess as correct if it equals game.name OR matches any keyword (case-insensitive)
+            val correctOffline = run {
+                val normalizedGuess = guess.trim()
+                val nameMatch = game.name.trim().equals(normalizedGuess, ignoreCase = true)
+                val kwMatch = game.keywords.any { it.trim().equals(normalizedGuess, ignoreCase = true) }
+                nameMatch || kwMatch
+            }
+
+            val correct = response?.correct ?: correctOffline
             val hint = response?.hint ?: if (!correct && game.keywords.isNotEmpty()) game.keywords.random() else null
 
             withContext(Dispatchers.Main) {
@@ -161,8 +157,6 @@ class KeyGameFragment : Fragment() {
         }
     }
 
-
-    // Process guess result
     private fun processGuessResult(correct: Boolean, hint: String?) {
         if (correct) {
             showEndGameDialog(true, currentGame?.name ?: "Unknown", currentGame?.coverImageUrl)
@@ -183,8 +177,6 @@ class KeyGameFragment : Fragment() {
         }
     }
 
-
-    // UI helpers
     private fun resetHearts() {
         hearts.clear()
         for (i in 0 until maxLives) {
@@ -206,8 +198,6 @@ class KeyGameFragment : Fragment() {
         keywordsChipGroup.addView(chip)
     }
 
-
-    // End game dialog + streaks
     private fun showEndGameDialog(won: Boolean, gameName: String, coverUrl: String?) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_end_game, null)
         val imageView = dialogView.findViewById<ImageView>(R.id.gameCoverImage)
@@ -257,7 +247,6 @@ class KeyGameFragment : Fragment() {
         fetchRandomGame()
     }
 
-    // Helpers
     private fun isToday(timestamp: Long): Boolean {
         if (timestamp == 0L) return false
         val lastPlayedCal = Calendar.getInstance().apply { timeInMillis = timestamp }

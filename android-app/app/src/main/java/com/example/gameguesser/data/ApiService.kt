@@ -2,6 +2,7 @@ package com.example.gameguesser.data
 
 import com.example.gameguesser.models.CompareRequest
 import com.example.gameguesser.models.ComparisonResponse
+import com.example.gameguesser.models.FullGameResponse
 import com.example.gameguesser.models.GuessResponse
 import com.example.gameguesser.models.RandomGameResponse
 import retrofit2.Call
@@ -35,5 +36,9 @@ interface ApiService {
     fun compareGame(
         @Body compareRequest: CompareRequest
     ): Call<ComparisonResponse>
+
+//    @GET("api/games/{id}")
+//    fun getGameById(@Path("id") id: String): Call<FullGameResponse>
+
 
 }

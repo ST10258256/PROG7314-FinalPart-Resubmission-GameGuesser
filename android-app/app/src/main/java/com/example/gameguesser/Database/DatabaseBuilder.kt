@@ -1,26 +1,11 @@
-package com.example.gameguesser.Database.DatabaseBuilder
+package com.example.gameguesser.Database
 
 import android.content.Context
-import androidx.room.Room
-import com.example.gameguesser.Database.AppDatabase
 
-//this object ensures that the database is only created once
-//and because of it, everyone will be reusing the same db
+// Single access point for getting the AppDatabase instance.
+// Avoid using Room.databaseBuilder directly elsewhere in the project.
 object DatabaseBuilder {
-
-    @Volatile
-    private var INSTANCE: AppDatabase? = null
-
     fun getInstance(context: Context): AppDatabase {
-        return INSTANCE ?: synchronized(this) {
-            val instance = Room.databaseBuilder(
-                context.applicationContext,
-                AppDatabase::class.java,
-                "gameguessr_database"
-            )
-                .build()
-            INSTANCE = instance
-            instance
-        }
+        return AppDatabase.getDatabase(context)
     }
 }

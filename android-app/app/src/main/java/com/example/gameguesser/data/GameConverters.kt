@@ -10,14 +10,19 @@ class GameConverters {
 
     @TypeConverter
     fun fromStringList(value: List<String>?): String {
-        return gson.toJson(value)
+        // store empty list as JSON array "[]", avoid storing literal "null"
+        return gson.toJson(value ?: emptyList<String>())
     }
 
     @TypeConverter
     fun toStringList(value: String?): List<String> {
         if (value.isNullOrEmpty()) return emptyList()
-        val listType = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(value, listType)
+        return try {
+            val listType = object : TypeToken<List<String>>() {}.type
+            gson.fromJson(value, listType)
+        } catch (ex: Exception) {
+            emptyList()
+        }
     }
 
     @TypeConverter
@@ -31,4 +36,3 @@ class GameConverters {
     }
 
 }
-
