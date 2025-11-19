@@ -9,11 +9,6 @@ import com.google.gson.annotations.SerializedName
 @Entity(tableName = "games")
 @TypeConverters(GameConverters::class)
 data class Game(
-
-  //  @Ignore
-    @SerializedName("_id")
-    var _id: IdObject? = null,  // holds the Mongo _id
-
     @PrimaryKey
     var id: String = "",
 
@@ -30,19 +25,19 @@ data class Game(
     var pov: String = "",
     var clues: List<String> = emptyList(),
     var keywords: List<String> = emptyList(),
-
-    ) {
-
-    val mongoId: String
-        get() = _id?.oid ?: id
-
-    val safeId: String
-        get() = if (id.isNotBlank()) id else _id?.oid ?: ""
-
-    constructor() : this(_id = null)
-}
-
-data class IdObject(
-    @SerializedName("\$oid")
-    val oid: String = ""
 )
+//{
+
+//    val mongoId: String
+//        get() = _id?.oid ?: id
+//
+//    val safeId: String
+//        get() = if (id.isNotBlank()) id else _id?.oid ?: ""
+//
+//    constructor() : this(_id = null)
+//}
+//
+//data class IdObject(
+//    @SerializedName("\$oid")
+//    val oid: String = ""
+//)

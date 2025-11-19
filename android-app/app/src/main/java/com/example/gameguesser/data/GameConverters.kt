@@ -20,15 +20,15 @@ class GameConverters {
         return gson.fromJson(value, listType)
     }
 
-    @TypeConverter
-    fun fromIdObject(value: IdObject?): String? {
-        return value?.oid
-    }
-
-    @TypeConverter
-    fun toIdObject(value: String?): IdObject? {
-        return if (value == null) null else IdObject(value)
-    }
+//    @TypeConverter
+//    fun fromIdObject(value: IdObject?): String? {
+//        return value?.oid
+//    }
+//
+//    @TypeConverter
+//    fun toIdObject(value: String?): IdObject? {
+//        return if (value == null) null else IdObject(value)
+    //}
 
 
 }

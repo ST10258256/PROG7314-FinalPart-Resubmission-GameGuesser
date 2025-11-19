@@ -44,12 +44,10 @@ class GameAdapter(
         }
 
         holder.itemView.setOnClickListener {
-            val mongoId = game.mongoId
-            Log.d("GameClick", "Clicked game: ${game.name}, mongoId: $mongoId")
-
+            // Use game.id instead of mongoId
+            Log.d("GameClick", "Clicked game: ${game.name}, id: ${game.id}")
             onItemClick(game)
         }
-
     }
 
     override fun getItemCount(): Int = games.size

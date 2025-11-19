@@ -10,23 +10,16 @@ object RetrofitClient {
 
     private const val BASE_URL = "https://gameguesser-api.onrender.com/"
 
-    val gson = GsonBuilder()
+    val gson: Gson = GsonBuilder()
         .registerTypeAdapter(object : TypeToken<List<Game>>() {}.type,
             JsonDeserializer { json, _, _ ->
 
-                // The API wraps the array in { "message": "...", "data": [ ... ] }
-                val rootObj = json.asJsonObject
-
-                val dataArray = rootObj["data"]?.asJsonArray
-                    ?: return@JsonDeserializer emptyList<Game>()
-
-                dataArray.map { element ->
+                // The API returns a JSON array directly
+                val arr = json.asJsonArray
+                arr.map { element ->
                     val jsonObj = element.asJsonObject
-                    val idObject = jsonObj["_id"]?.asJsonObject
-                    val mongoId = idObject?.get("\$oid")?.asString ?: ""
                     Game(
-                        _id = if (mongoId.isNotEmpty()) IdObject(mongoId) else null,
-                        id = mongoId,
+                        id = jsonObj["id"]?.asString ?: "",
                         name = jsonObj["name"]?.asString ?: "",
                         genre = jsonObj["genre"]?.asString ?: "",
                         platforms = jsonObj["platforms"]?.asJsonArray?.map { it.asString } ?: emptyList(),
@@ -46,7 +39,6 @@ object RetrofitClient {
         )
         .create()
 
-
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
@@ -54,8 +46,8 @@ object RetrofitClient {
             .build()
     }
 
-
     val api: ApiService by lazy {
         retrofit.create(ApiService::class.java)
     }
 }
+
